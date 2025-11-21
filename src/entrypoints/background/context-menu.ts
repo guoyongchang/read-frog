@@ -2,8 +2,8 @@ import type { Browser } from '#imports'
 import type { Config } from '@/types/config/config'
 import { browser, i18n, storage } from '#imports'
 import { CONFIG_STORAGE_KEY } from '@/utils/constants/config'
-import { getTranslationStateKey } from '@/utils/constants/storage-keys'
-import { onMessage, sendMessage } from '@/utils/message'
+import { getTranslationStateKey, TRANSLATION_STATE_KEY_PREFIX } from '@/utils/constants/storage-keys'
+import { sendMessage } from '@/utils/message'
 
 const MENU_ID_TRANSLATE = 'read-frog-translate'
 
@@ -41,39 +41,26 @@ export async function setupContextMenu() {
     }
   })
 
-  // Listen for translation state changes from other UI components
-  onMessage('setEnablePageTranslation', async (msg) => {
-    const { tabId, enabled } = msg.data
-    // Get current tab to check if we should update the menu
-    const [activeTab] = await browser.tabs.query({ active: true, currentWindow: true })
-    if (activeTab?.id === tabId) {
-      await updateTranslateMenuTitle(tabId, enabled)
-    }
-  })
+  // Listen for translation state changes in storage
+  // This ensures menu updates when translation is toggled from any UI
+  // (floating button, auto-translate, etc.) without interfering with
+  // the translation logic in translation-signal.ts
+  browser.storage.session.onChanged.addListener(async (changes) => {
+    for (const [key, change] of Object.entries(changes)) {
+      // Check if this is a translation state change
+      if (key.startsWith(TRANSLATION_STATE_KEY_PREFIX.replace('session:', ''))) {
+        // Extract tabId from key (format: "translationState.{tabId}")
+        const parts = key.split('.')
+        const tabId = Number.parseInt(parts[1])
 
-  onMessage('setEnablePageTranslationOnContentScript', async (msg) => {
-    const tabId = msg.sender?.tab?.id
-    const { enabled } = msg.data
-    if (typeof tabId === 'number') {
-      // Get current tab to check if we should update the menu
-      const [activeTab] = await browser.tabs.query({ active: true, currentWindow: true })
-      if (activeTab?.id === tabId) {
-        await updateTranslateMenuTitle(tabId, enabled)
-      }
-    }
-  })
-
-  onMessage('checkAndSetAutoTranslation', async (msg) => {
-    const tabId = msg.sender?.tab?.id
-    if (typeof tabId === 'number') {
-      // Get current tab to check if we should update the menu
-      const [activeTab] = await browser.tabs.query({ active: true, currentWindow: true })
-      if (activeTab?.id === tabId) {
-        // Auto-translation changes state, update menu after a short delay
-        // to ensure storage is updated
-        setTimeout(() => {
-          void updateTranslateMenuTitle(tabId)
-        }, 100)
+        if (!Number.isNaN(tabId)) {
+          // Only update menu if this is the active tab
+          const [activeTab] = await browser.tabs.query({ active: true, currentWindow: true })
+          if (activeTab?.id === tabId) {
+            const newValue = change.newValue as { enabled: boolean } | undefined
+            await updateTranslateMenuTitle(tabId, newValue?.enabled)
+          }
+        }
       }
     }
   })
