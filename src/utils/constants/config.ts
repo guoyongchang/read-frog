@@ -71,7 +71,6 @@ export const DEFAULT_CONFIG: Config = {
   },
   contextMenu: {
     translateEnabled: true,
-    readEnabled: false,
   },
 }
 

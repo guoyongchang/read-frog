@@ -170,7 +170,6 @@ Translate to {{targetLang}}:
       },
       contextMenu: {
         translateEnabled: true,
-        readEnabled: false,
       },
     },
   },
@@ -291,7 +290,6 @@ Translate to {{targetLang}}:
       },
       contextMenu: {
         translateEnabled: true,
-        readEnabled: false,
       },
     },
   },

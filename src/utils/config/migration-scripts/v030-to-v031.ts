@@ -8,7 +8,6 @@
  * After (v031):
  *   contextMenu: {
  *     translateEnabled: boolean  // Enable translate in context menu (default: true)
- *     readEnabled: boolean       // Enable read in context menu (default: false)
  *   }
  */
 
@@ -17,7 +16,6 @@ export function migrate(oldConfig: any): any {
     ...oldConfig,
     contextMenu: {
       translateEnabled: true,
-      readEnabled: false,
     },
   }
 }
