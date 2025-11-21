@@ -24,11 +24,13 @@ export async function setupContextMenu() {
   currentConfig = config
   await updateContextMenuItems(config)
 
-  // Listen for config changes
-  storage.watch<Config>(`local:${CONFIG_STORAGE_KEY}`, async (newConfig) => {
-    if (newConfig) {
-      currentConfig = newConfig
-      await updateContextMenuItems(newConfig)
+  // Listen for config changes using native Chrome API for persistence
+  // This ensures the listener survives service worker sleep/wake cycles
+  browser.storage.local.onChanged.addListener(async (changes) => {
+    const configChange = changes[CONFIG_STORAGE_KEY]
+    if (configChange?.newValue) {
+      currentConfig = configChange.newValue as Config
+      await updateContextMenuItems(currentConfig)
     }
   })
 
@@ -166,9 +168,11 @@ function validateTranslationConfigInBackground(config: Config): boolean {
   }
 
   // Check if detected language and target language are the same in auto mode
+  // Note: Unlike the case above, this only warns but does NOT block translation
+  // This matches the behavior of validateTranslationConfig in translate-text.ts
   if (languageConfig.sourceCode === 'auto' && languageConfig.detectedCode === languageConfig.targetCode) {
     logger.warn('[ContextMenu] Detected language matches target language in auto mode')
-    return false
+    // Don't return false - allow translation to proceed with warning
   }
 
   // Check if API key is configured for providers that require it
