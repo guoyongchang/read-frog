@@ -17,8 +17,11 @@ import { setupUninstallSurvey } from './uninstall-survey'
 
 export default defineBackground({
   type: 'module',
-  main: () => {
+  main: async () => {
     logger.info('Hello background!', { id: browser.runtime.id })
+
+    // Ensure config is initialized before setting up features that depend on it
+    await ensureInitializedConfig()
 
     browser.runtime.onInstalled.addListener(async (details) => {
       await ensureInitializedConfig()
