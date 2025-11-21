@@ -17,6 +17,7 @@ interface ProtocolMap {
   setEnablePageTranslationOnContentScript: (data: { enabled: boolean }) => void
   checkAndSetAutoTranslation: (data: { url: string }) => void
   translationStateChanged: (data: { enabled: boolean }) => void
+  showTranslationConfigError: () => void
   // read article
   readArticle: () => void
   popupRequestReadArticle: (data: { tabId: number }) => void

@@ -95,6 +95,21 @@ export default defineContentScript({
       enabled ? void manager.start() : manager.stop()
     })
 
+    // Listen for translation config error from context menu
+    onMessage('showTranslationConfigError', async () => {
+      const config = await getConfigFromStorage()
+      if (!config)
+        return
+
+      // Dynamically import validateTranslationConfig to show proper error messages with toast
+      const { validateTranslationConfig } = await import('@/utils/host/translate/translate-text')
+      validateTranslationConfig({
+        providersConfig: config.providersConfig,
+        translate: config.translate,
+        language: config.language,
+      })
+    })
+
     const config = await getConfigFromStorage()
     if (config) {
       const { detectedCode } = getDocumentInfo()
