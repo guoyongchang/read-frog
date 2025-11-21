@@ -66,11 +66,15 @@ export async function setupContextMenu() {
   onMessage('checkAndSetAutoTranslation', async (msg) => {
     const tabId = msg.sender?.tab?.id
     if (typeof tabId === 'number') {
-      // Auto-translation changes state, update menu after a short delay
-      // to ensure storage is updated
-      setTimeout(() => {
-        void updateTranslateMenuTitle(tabId)
-      }, 100)
+      // Get current tab to check if we should update the menu
+      const [activeTab] = await browser.tabs.query({ active: true, currentWindow: true })
+      if (activeTab?.id === tabId) {
+        // Auto-translation changes state, update menu after a short delay
+        // to ensure storage is updated
+        setTimeout(() => {
+          void updateTranslateMenuTitle(tabId)
+        }, 100)
+      }
     }
   })
 
