@@ -5,6 +5,7 @@ import { onMessage, sendMessage } from '@/utils/message'
 import { SessionCacheGroupRegistry } from '@/utils/session-cache/session-cache-group-registry'
 import { ensureInitializedConfig } from './config'
 import { setUpConfigBackup } from './config-backup'
+import { setupContextMenu } from './context-menu'
 import { cleanupAllCache, setUpDatabaseCleanup } from './db-cleanup'
 import { handleAnalyzeSelectionPort, handleTranslateStreamPort, runAnalyzeSelectionStream } from './firefox-stream'
 import { initMockData } from './mock-data'
@@ -78,6 +79,7 @@ export default defineBackground({
 
     newUserGuide()
     translationMessage()
+    void setupContextMenu()
 
     void setUpRequestQueue()
     void setUpDatabaseCleanup()
