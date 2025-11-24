@@ -7,23 +7,18 @@ import { CONFIG_STORAGE_KEY } from '@/utils/constants/config'
 import { getTranslationStateKey, TRANSLATION_STATE_KEY_PREFIX } from '@/utils/constants/storage-keys'
 import { logger } from '@/utils/logger'
 import { sendMessage } from '@/utils/message'
+import { ensureInitializedConfig } from './config'
 
 const MENU_ID_TRANSLATE = 'read-frog-translate'
 
 let currentConfig: Config | null = null
 
 /**
- * Initialize context menu based on config
+ * Register all context menu event listeners synchronously
+ * This must be called during main() execution to ensure listeners are registered
+ * before Chrome completes initialization
  */
-export async function setupContextMenu() {
-  const config = await storage.getItem<Config>(`local:${CONFIG_STORAGE_KEY}`)
-  if (!config) {
-    return
-  }
-
-  currentConfig = config
-  await updateContextMenuItems(config)
-
+export function registerContextMenuListeners() {
   // Listen for config changes using native Chrome API for persistence
   // This ensures the listener survives service worker sleep/wake cycles
   browser.storage.local.onChanged.addListener(async (changes) => {
@@ -72,6 +67,21 @@ export async function setupContextMenu() {
 
   // Handle menu item clicks
   browser.contextMenus.onClicked.addListener(handleContextMenuClick)
+}
+
+/**
+ * Initialize context menu items based on config
+ * This can be called asynchronously after listeners are registered
+ */
+export async function initializeContextMenu() {
+  // Ensure config is initialized before setting up context menu
+  const config = await ensureInitializedConfig()
+  if (!config) {
+    return
+  }
+
+  currentConfig = config
+  await updateContextMenuItems(config)
 }
 
 /**
