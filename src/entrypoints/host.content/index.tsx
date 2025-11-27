@@ -6,7 +6,7 @@ import ReactDOM from 'react-dom/client'
 import { getConfigFromStorage } from '@/utils/config/config'
 import { APP_NAME } from '@/utils/constants/app'
 import { CONFIG_STORAGE_KEY } from '@/utils/constants/config'
-import { getDocumentInfo } from '@/utils/content'
+import { getDocumentInfo } from '@/utils/content/analyze'
 import { logger } from '@/utils/logger'
 import { onMessage, sendMessage } from '@/utils/message'
 import { protectSelectAllShadowRoot } from '@/utils/select-all'
@@ -63,20 +63,28 @@ export default defineContentScript({
 
     manager.registerPageTranslationTriggers()
 
-    const handleUrlChange = (from: string, to: string) => {
+    const handleUrlChange = async (from: string, to: string) => {
       if (from !== to) {
         logger.info('URL changed from', from, 'to', to)
         if (manager.isActive) {
           manager.stop()
         }
+        const config = await getConfigFromStorage()
+        if (!config)
+          return
+        const { detectedCodeOrUnd } = await getDocumentInfo()
+        await storage.setItem<Config>(`local:${CONFIG_STORAGE_KEY}`, {
+          ...config,
+          language: { ...config.language, detectedCode: detectedCodeOrUnd === 'und' ? 'eng' : detectedCodeOrUnd },
+        })
         // Notify background script that URL has changed, let it decide whether to automatically enable translation
-        void sendMessage('checkAndSetAutoTranslation', { url: to })
+        void sendMessage('checkAndSetAutoTranslation', { url: to, detectedCodeOrUnd })
       }
     }
 
     window.addEventListener('extension:URLChange', (e: any) => {
       const { from, to } = e.detail
-      handleUrlChange(from, to)
+      void handleUrlChange(from, to)
     })
 
     void bindTranslationShortcutKey(manager)
@@ -112,14 +120,14 @@ export default defineContentScript({
 
     const config = await getConfigFromStorage()
     if (config) {
-      const { detectedCode } = getDocumentInfo()
+      const { detectedCodeOrUnd } = await getDocumentInfo()
       await storage.setItem<Config>(`local:${CONFIG_STORAGE_KEY}`, {
         ...config,
-        language: { ...config.language, detectedCode },
+        language: { ...config.language, detectedCode: detectedCodeOrUnd === 'und' ? 'eng' : detectedCodeOrUnd },
       })
 
       // Check if auto-translation should be enabled for initial page load
-      void sendMessage('checkAndSetAutoTranslation', { url: window.location.href })
+      void sendMessage('checkAndSetAutoTranslation', { url: window.location.href, detectedCodeOrUnd })
     }
   },
 })

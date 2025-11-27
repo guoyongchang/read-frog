@@ -40,6 +40,7 @@ export type TranslationNodeStyleConfig = z.infer<typeof translationNodeStyleConf
 export const translatePromptObjSchema = z.object({
   name: z.string(),
   id: z.string(),
+  systemPrompt: z.string(),
   prompt: z.string(),
 })
 export type TranslatePromptObj = z.infer<typeof translatePromptObjSchema>
@@ -75,7 +76,9 @@ export const translateConfigSchema = z.object({
     autoTranslatePatterns: z.array(z.string()),
     autoTranslateLanguages: z.array(langCodeISO6393Schema),
     shortcut: z.array(z.string()),
+    enableLLMDetection: z.boolean(),
   }),
+  enableAIContentAware: z.boolean(),
   customPromptsConfig: customPromptsConfigSchema,
   requestQueueConfig: requestQueueConfigSchema,
   batchQueueConfig: batchQueueConfigSchema,

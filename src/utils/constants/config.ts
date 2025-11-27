@@ -4,12 +4,12 @@ import { DEFAULT_TRANSLATE_PROMPTS_CONFIG } from './prompt'
 import { DEFAULT_PROVIDER_CONFIG_LIST } from './providers'
 import { DEFAULT_SIDE_CONTENT_WIDTH } from './side'
 import { DEFAULT_AUTO_TRANSLATE_SHORTCUT_KEY, DEFAULT_BATCH_CONFIG, DEFAULT_REQUEST_CAPACITY, DEFAULT_REQUEST_RATE } from './translate'
-import { DEFAULT_TRANSLATION_NODE_STYLE } from './translation-node-style'
+import { TRANSLATION_NODE_STYLE_ON_INSTALLED } from './translation-node-style'
 import { DEFAULT_TTS_CONFIG } from './tts'
 
 export const CONFIG_STORAGE_KEY = 'config'
 export const CONFIG_SCHEMA_VERSION_STORAGE_KEY = '__configSchemaVersion'
-export const CONFIG_SCHEMA_VERSION = 31
+export const CONFIG_SCHEMA_VERSION = 34
 
 export const DEFAULT_FLOATING_BUTTON_POSITION = 0.66
 
@@ -37,7 +37,9 @@ export const DEFAULT_CONFIG: Config = {
       autoTranslatePatterns: ['news.ycombinator.com'],
       autoTranslateLanguages: [],
       shortcut: DEFAULT_AUTO_TRANSLATE_SHORTCUT_KEY,
+      enableLLMDetection: false,
     },
+    enableAIContentAware: false,
     customPromptsConfig: DEFAULT_TRANSLATE_PROMPTS_CONFIG,
     requestQueueConfig: {
       capacity: DEFAULT_REQUEST_CAPACITY,
@@ -48,7 +50,7 @@ export const DEFAULT_CONFIG: Config = {
       maxItemsPerBatch: DEFAULT_BATCH_CONFIG.maxItemsPerBatch,
     },
     translationNodeStyle: {
-      preset: DEFAULT_TRANSLATION_NODE_STYLE,
+      preset: TRANSLATION_NODE_STYLE_ON_INSTALLED,
       isCustom: false,
       customCSS: null,
     },

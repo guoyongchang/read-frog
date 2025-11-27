@@ -17,19 +17,19 @@ popup:
   options: オプション
   hover: ホバー
   translateParagraph: 段落を翻訳
-  help:
-    title: ヘルプ
-    description: より多くのヒントとトリックを発見します
-  book:
-    title: 電子書籍
-    description: 任意のePub書籍をAIで読み解きます。（Neat Reader と Read Frog は独立した製品です。Neat Reader での購入は Read Frog とは関係ありません。）
   discord:
-    title: Discord
-    description: 開発者や他のユーザーとつながる
-  github:
-    description: ⭐️ スターを付けると、新しいリリース通知をすぐに受け取れます！
+    tooltip: Discordに参加して開発者とつながり、新機能を先行体験しましょう
   blog:
     notification: 読書カエルの最新情報
+  aiSmartContext: AI スマートコンテキスト
+  aiSmartContextDescription: ウェブページのコンテキストを使用して翻訳品質を向上させます。LLM翻訳プロバイダーが必要です。
+  more:
+    title: その他
+    joinDiscord: Discordに参加
+    joinWechat: WeChatグループに参加
+    starGithub: Githubでスター
+    ebook: サードパーティ電子書籍リーダー
+    tutorial: 使い方ガイド
 options:
   sidebar:
     settings: 設定
@@ -204,8 +204,8 @@ options:
         title: 最大段落数
         description: 各バッチ翻訳の最大段落数、各翻訳のコンテンツ量を制御します
       statisticsLink: 過去 7 日間で約 $1 のコストを節約しました
-    alwaysTranslate:
-      title: 常に翻訳
+    autoTranslateWebsite:
+      title: ウェブサイトに基づく自動翻訳
       description: このサイトを常に翻訳する
       urlPattern: URL パターン
       enterUrlPattern: URL パターンを入力
@@ -221,9 +221,13 @@ options:
       editPrompt:
         title: プロンプトを編集
         name: 名前
+        systemPrompt: システムプロンプト
+        prompt: プロンプト
         promptCellInput:
           input: 翻訳するテキスト内容
           targetLang: 目標言語
+          title: ウェブページタイトル
+          summary: ウェブページ要約（AI スマートコンテキストが必要）
         save: 保存
         close: キャンセル
       deletePrompt:
@@ -284,10 +288,19 @@ options:
     nodeTranslationHotkey:
       title: ホバー翻訳ショートカットキー
       description: テキストにホバーして段落を翻訳する際の修飾キーをカスタマイズします
+    llmProviderConfigured: LLM 翻訳プロバイダーが設定されています
+    llmProviderNotConfigured: LLM 翻訳プロバイダーが設定されていません
     autoTranslateLanguages:
       title: 言語に基づく自動翻訳
       description: 特定の言語が検出された場合にページコンテンツを自動翻訳します
       selectLanguages: 言語を選択
+      enableLLMDetection: LLM を使用した言語検出
+      enableLLMDetectionDescription: 精度が向上しますが、遅延と API コストが増加します。LLM 翻訳プロバイダーと自動翻訳言語の設定が必要です。
+    aiContentAware:
+      title: AI スマートコンテキスト翻訳
+      description: 記事のコンテキストを AI に提供して翻訳品質を向上させます
+      enable: AI スマートコンテキスト翻訳を有効にする
+      enableDescription: AI は記事の要約を使用して翻訳精度を向上させます。LLM プロバイダーが必要です。翻訳開始時に遅延が発生し、API コストが増加します。
   tts:
     title: テキスト読み上げ
     description: お好みの OpenAI 音声設定で読み上げボタンをカスタマイズします。

@@ -1,3 +1,4 @@
+import type { LangCodeISO6393 } from '@read-frog/definitions'
 import type { Config } from '@/types/config/config'
 import type { ProviderConfig } from '@/types/config/provider'
 import type { BatchQueueConfig, RequestQueueConfig } from '@/types/config/translate'
@@ -15,7 +16,7 @@ interface ProtocolMap {
   getEnablePageTranslationFromContentScript: () => Promise<boolean>
   setEnablePageTranslation: (data: { tabId: number, enabled: boolean }) => void
   setEnablePageTranslationOnContentScript: (data: { enabled: boolean }) => void
-  checkAndSetAutoTranslation: (data: { url: string }) => void
+  checkAndSetAutoTranslation: (data: { url: string, detectedCodeOrUnd: LangCodeISO6393 | 'und' }) => void
   translationStateChanged: (data: { enabled: boolean }) => void
   showTranslationConfigError: () => void
   // read article
@@ -28,13 +29,13 @@ interface ProtocolMap {
   // selection helpers
   analyzeSelection: (data: { providerId: string, systemPrompt: string, userMessage: string, temperature?: number }) => Promise<string>
   // request
-  enqueueTranslateRequest: (data: { text: string, langConfig: Config['language'], providerConfig: ProviderConfig, scheduleAt: number, hash: string }) => Promise<string>
+  enqueueTranslateRequest: (data: { text: string, langConfig: Config['language'], providerConfig: ProviderConfig, scheduleAt: number, hash: string, articleTitle?: string, articleTextContent?: string }) => Promise<string>
   setTranslateRequestQueueConfig: (data: Partial<RequestQueueConfig>) => void
   setTranslateBatchQueueConfig: (data: Partial<BatchQueueConfig>) => void
   // network proxy
   backgroundFetch: (data: ProxyRequest) => Promise<ProxyResponse>
   // cache management
-  clearAllCache: () => Promise<void>
+  clearAllTranslationRelatedCache: () => Promise<void>
 }
 
 export const { sendMessage, onMessage }

@@ -2,4 +2,4 @@
 "@read-frog/extension": patch
 ---
 
-fix: nx config for proper build caching
+style: update custom prompt sheet

@@ -6,7 +6,7 @@ import { SessionCacheGroupRegistry } from '@/utils/session-cache/session-cache-g
 import { ensureInitializedConfig } from './config'
 import { setUpConfigBackup } from './config-backup'
 import { initializeContextMenu, registerContextMenuListeners } from './context-menu'
-import { cleanupAllCache, setUpDatabaseCleanup } from './db-cleanup'
+import { cleanupAllSummaryCache, cleanupAllTranslationCache, setUpDatabaseCleanup } from './db-cleanup'
 import { handleAnalyzeSelectionPort, handleTranslateStreamPort, runAnalyzeSelectionStream } from './firefox-stream'
 import { initMockData } from './mock-data'
 import { newUserGuide } from './new-user-guide'
@@ -73,8 +73,9 @@ export default defineBackground({
       }
     })
 
-    onMessage('clearAllCache', async () => {
-      await cleanupAllCache()
+    onMessage('clearAllTranslationRelatedCache', async () => {
+      await cleanupAllTranslationCache()
+      await cleanupAllSummaryCache()
     })
 
     newUserGuide()
