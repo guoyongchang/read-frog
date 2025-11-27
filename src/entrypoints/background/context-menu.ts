@@ -11,8 +11,6 @@ import { ensureInitializedConfig } from './config'
 
 const MENU_ID_TRANSLATE = 'read-frog-translate'
 
-let currentConfig: Config | null = null
-
 /**
  * Register all context menu event listeners synchronously
  * This must be called during main() execution to ensure listeners are registered
@@ -24,8 +22,7 @@ export function registerContextMenuListeners() {
   browser.storage.local.onChanged.addListener(async (changes) => {
     const configChange = changes[CONFIG_STORAGE_KEY]
     if (configChange?.newValue) {
-      currentConfig = configChange.newValue as Config
-      await updateContextMenuItems(currentConfig)
+      await updateContextMenuItems(configChange.newValue as Config)
     }
   })
 
@@ -80,7 +77,6 @@ export async function initializeContextMenu() {
     return
   }
 
-  currentConfig = config
   await updateContextMenuItems(config)
 }
 
@@ -114,7 +110,8 @@ async function updateContextMenuItems(config: Config) {
  * @param enabled - Optional: if provided, use this value instead of reading from storage
  */
 async function updateTranslateMenuTitle(tabId: number, enabled?: boolean) {
-  if (!currentConfig?.contextMenu.enabled) {
+  const config = await ensureInitializedConfig()
+  if (!config?.contextMenu.enabled) {
     return
   }
 
@@ -205,8 +202,9 @@ async function handleTranslateClick(tabId: number) {
   const newState = !isCurrentlyTranslated
 
   // If enabling translation, validate configuration first
-  if (newState && currentConfig) {
-    if (!validateTranslationConfigInBackground(currentConfig)) {
+  if (newState) {
+    const config = await ensureInitializedConfig()
+    if (config && !validateTranslationConfigInBackground(config)) {
       logger.error('[ContextMenu] Translation config validation failed')
       // Send a message to content script to show error notification
       void sendMessage('showTranslationConfigError', undefined, tabId)

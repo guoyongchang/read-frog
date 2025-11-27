@@ -2,7 +2,7 @@ import { browser, i18n } from '#imports'
 import { useAtom, useAtomValue } from 'jotai'
 import { Button } from '@/components/shadcn/button'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
-import { validateTranslationConfig } from '@/utils/host/translate/translate-text'
+import { validateTranslationConfigAndToast } from '@/utils/host/translate/translate-text'
 import { sendMessage } from '@/utils/message'
 import { formatHotkey } from '@/utils/os.ts'
 import { cn } from '@/utils/styles/tailwind'
@@ -23,7 +23,7 @@ export default function TranslateButton({ className }: { className?: string }) {
     })
 
     if (currentTab.id) {
-      if (!isPageTranslated && !validateTranslationConfig({
+      if (!isPageTranslated && !validateTranslationConfigAndToast({
         providersConfig,
         translate: translateConfig,
         language: languageConfig,

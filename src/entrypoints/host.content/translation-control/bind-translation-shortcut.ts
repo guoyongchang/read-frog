@@ -1,7 +1,7 @@
 import type { PageTranslationManager } from './page-translation'
 import hotkeys from 'hotkeys-js'
 import { getConfigFromStorage } from '@/utils/config/config'
-import { validateTranslationConfig } from '@/utils/host/translate/translate-text'
+import { validateTranslationConfigAndToast } from '@/utils/host/translate/translate-text'
 
 export async function bindTranslationShortcutKey(pageTranslationManager: PageTranslationManager) {
   // Clear all existing hotkeys first
@@ -23,7 +23,7 @@ export async function bindTranslationShortcutKey(pageTranslationManager: PageTra
         pageTranslationManager.stop()
       }
       else {
-        if (!validateTranslationConfig({
+        if (!validateTranslationConfigAndToast({
           providersConfig: currentConfig.providersConfig,
           translate: currentConfig.translate,
           language: currentConfig.language,

@@ -1,7 +1,7 @@
 import { Icon } from '@iconify/react'
 import { useAtomValue } from 'jotai'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
-import { validateTranslationConfig } from '@/utils/host/translate/translate-text'
+import { validateTranslationConfigAndToast } from '@/utils/host/translate/translate-text'
 import { logger } from '@/utils/logger'
 import { sendMessage } from '@/utils/message'
 import { cn } from '@/utils/styles/tailwind'
@@ -20,7 +20,7 @@ export default function TranslateButton({ className }: { className: string }) {
       className={className}
       onClick={() => {
         if (!enablePageTranslation) {
-          if (!validateTranslationConfig({
+          if (!validateTranslationConfigAndToast({
             providersConfig,
             translate: translateConfig,
             language: languageConfig,

@@ -181,7 +181,7 @@ export async function translateText(text: string) {
   })
 }
 
-export function validateTranslationConfig(config: Pick<Config, 'providersConfig' | 'translate' | 'language'>): boolean {
+export function validateTranslationConfigAndToast(config: Pick<Config, 'providersConfig' | 'translate' | 'language'>): boolean {
   const { providersConfig, translate: translateConfig, language: languageConfig } = config
   const providerConfig = getProviderConfigById(providersConfig, translateConfig.providerId)
   if (!providerConfig) {

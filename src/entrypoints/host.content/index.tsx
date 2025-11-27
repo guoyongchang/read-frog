@@ -104,19 +104,19 @@ export default defineContentScript({
     })
 
     // Listen for translation config error from context menu
-    onMessage('showTranslationConfigError', async () => {
-      const config = await getConfigFromStorage()
-      if (!config)
-        return
+    // onMessage('showTranslationConfigError', async () => {
+    //   const config = await getConfigFromStorage()
+    //   if (!config)
+    //     return
 
-      // Dynamically import validateTranslationConfig to show proper error messages with toast
-      const { validateTranslationConfig } = await import('@/utils/host/translate/translate-text')
-      validateTranslationConfig({
-        providersConfig: config.providersConfig,
-        translate: config.translate,
-        language: config.language,
-      })
-    })
+    //   // Dynamically import validateTranslationConfig to show proper error messages with toast
+    //   const { validateTranslationConfig } = await import('@/utils/host/translate/translate-text')
+    //   validateTranslationConfig({
+    //     providersConfig: config.providersConfig,
+    //     translate: config.translate,
+    //     language: config.language,
+    //   })
+    // })
 
     const config = await getConfigFromStorage()
     if (config) {
