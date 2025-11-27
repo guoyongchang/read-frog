@@ -22,7 +22,6 @@ interface ProtocolMap {
   checkAndAskAutoPageTranslation: (data: { url: string, detectedCodeOrUnd: LangCodeISO6393 | 'und' }) => void
   // ask host to start page translation
   askManagerToTogglePageTranslation: (data: { enabled: boolean }) => void
-  showTranslationConfigError: () => void
   // read article
   readArticle: () => void
   popupRequestReadArticle: (data: { tabId: number }) => void

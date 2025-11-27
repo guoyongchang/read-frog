@@ -1,11 +1,8 @@
 import type { Browser } from '#imports'
 import type { Config } from '@/types/config/config'
 import { browser, i18n, storage } from '#imports'
-import { isAPIProviderConfig } from '@/types/config/provider'
-import { getProviderConfigById } from '@/utils/config/helpers'
 import { CONFIG_STORAGE_KEY } from '@/utils/constants/config'
 import { getTranslationStateKey, TRANSLATION_STATE_KEY_PREFIX } from '@/utils/constants/storage-keys'
-import { logger } from '@/utils/logger'
 import { sendMessage } from '@/utils/message'
 import { ensureInitializedConfig } from './config'
 
@@ -155,43 +152,6 @@ async function handleContextMenuClick(
 }
 
 /**
- * Validate translation configuration in background context
- * This is a simplified version of validateTranslationConfig without toast notifications
- */
-function validateTranslationConfigInBackground(config: Config): boolean {
-  const { providersConfig, translate: translateConfig, language: languageConfig } = config
-  const providerConfig = getProviderConfigById(providersConfig, translateConfig.providerId)
-
-  // Check if provider exists
-  if (!providerConfig) {
-    logger.warn('[ContextMenu] Translation provider not found')
-    return false
-  }
-
-  // Check if source and target languages are the same
-  if (languageConfig.sourceCode === languageConfig.targetCode) {
-    logger.warn('[ContextMenu] Source and target languages are the same')
-    return false
-  }
-
-  // Check if detected language and target language are the same in auto mode
-  // Note: Unlike the case above, this only warns but does NOT block translation
-  // This matches the behavior of validateTranslationConfig in translate-text.ts
-  if (languageConfig.sourceCode === 'auto' && languageConfig.detectedCode === languageConfig.targetCode) {
-    logger.warn('[ContextMenu] Detected language matches target language in auto mode')
-    // Don't return false - allow translation to proceed with warning
-  }
-
-  // Check if API key is configured for providers that require it
-  if (isAPIProviderConfig(providerConfig) && !providerConfig.apiKey?.trim() && !['deeplx', 'ollama'].includes(providerConfig.provider)) {
-    logger.warn('[ContextMenu] API key not configured for provider')
-    return false
-  }
-
-  return true
-}
-
-/**
  * Handle translate menu click - toggle page translation
  */
 async function handleTranslateClick(tabId: number) {
@@ -201,22 +161,11 @@ async function handleTranslateClick(tabId: number) {
   const isCurrentlyTranslated = state?.enabled ?? false
   const newState = !isCurrentlyTranslated
 
-  // If enabling translation, validate configuration first
-  if (newState) {
-    const config = await ensureInitializedConfig()
-    if (config && !validateTranslationConfigInBackground(config)) {
-      logger.error('[ContextMenu] Translation config validation failed')
-      // Send a message to content script to show error notification
-      void sendMessage('showTranslationConfigError', undefined, tabId)
-      return
-    }
-  }
-
   // Update storage directly (instead of sending message to self)
   await storage.setItem(getTranslationStateKey(tabId), { enabled: newState })
 
   // Notify content script in that specific tab
-  void sendMessage('notifyTranslationStateChanged', { enabled: newState }, tabId)
+  void sendMessage('askManagerToTogglePageTranslation', { enabled: newState }, tabId)
 
   // Update menu title immediately
   await updateTranslateMenuTitle(tabId)
