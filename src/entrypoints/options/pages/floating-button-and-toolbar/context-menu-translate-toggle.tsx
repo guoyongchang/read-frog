@@ -16,9 +16,9 @@ export function ContextMenuTranslateToggle() {
     >
       <div className="w-full flex justify-end">
         <Switch
-          checked={contextMenu.translateEnabled}
+          checked={contextMenu.enabled}
           onCheckedChange={(checked) => {
-            void setContextMenu({ ...contextMenu, translateEnabled: checked })
+            void setContextMenu({ ...contextMenu, enabled: checked })
           }}
         />
       </div>

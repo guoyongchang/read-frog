@@ -39,7 +39,7 @@ const betaExperienceSchema = z.object({
 
 // context menu schema
 const contextMenuSchema = z.object({
-  translateEnabled: z.boolean(),
+  enabled: z.boolean(),
 })
 
 // Complete config schema

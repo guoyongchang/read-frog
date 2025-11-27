@@ -91,7 +91,7 @@ async function updateContextMenuItems(config: Config) {
   // Remove all existing menu items first
   await browser.contextMenus.removeAll()
 
-  const { translateEnabled } = config.contextMenu
+  const { enabled: translateEnabled } = config.contextMenu
 
   if (translateEnabled) {
     browser.contextMenus.create({
@@ -114,7 +114,7 @@ async function updateContextMenuItems(config: Config) {
  * @param enabled - Optional: if provided, use this value instead of reading from storage
  */
 async function updateTranslateMenuTitle(tabId: number, enabled?: boolean) {
-  if (!currentConfig?.contextMenu.translateEnabled) {
+  if (!currentConfig?.contextMenu.enabled) {
     return
   }
 
