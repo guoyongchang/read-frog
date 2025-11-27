@@ -216,7 +216,7 @@ async function handleTranslateClick(tabId: number) {
   await storage.setItem(getTranslationStateKey(tabId), { enabled: newState })
 
   // Notify content script in that specific tab
-  void sendMessage('translationStateChanged', { enabled: newState }, tabId)
+  void sendMessage('notifyTranslationStateChanged', { enabled: newState }, tabId)
 
   // Update menu title immediately
   await updateTranslateMenuTitle(tabId)

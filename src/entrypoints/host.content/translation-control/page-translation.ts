@@ -89,10 +89,11 @@ export class PageTranslationManager implements IPageTranslationManager {
       return
     }
 
-    this.isPageTranslating = true
-    void sendMessage('setEnablePageTranslationOnContentScript', {
+    void sendMessage('setAndNotifyPageTranslationStateChangedByManager', {
       enabled: true,
     })
+
+    this.isPageTranslating = true
 
     // Listen to existing elements when they enter the viewpoint
     const walkId = crypto.randomUUID()
@@ -129,13 +130,13 @@ export class PageTranslationManager implements IPageTranslationManager {
       return
     }
 
+    void sendMessage('setAndNotifyPageTranslationStateChangedByManager', {
+      enabled: false,
+    })
+
     this.isPageTranslating = false
     this.walkId = null
     this.dontWalkIntoElementsCache = new WeakSet()
-
-    void sendMessage('setEnablePageTranslationOnContentScript', {
-      enabled: false,
-    })
 
     if (this.intersectionObserver) {
       this.intersectionObserver.disconnect()
