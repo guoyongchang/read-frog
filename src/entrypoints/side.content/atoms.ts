@@ -1,5 +1,5 @@
 import { atom, createStore } from 'jotai'
-import { createTranslationStateAtomFromContentScript } from '@/utils/atoms/translation-state'
+import { createTranslationStateAtomForContentScript } from '@/utils/atoms/translation-state'
 
 export const store = createStore()
 
@@ -12,7 +12,7 @@ export const progressAtom = atom({
   total: 0,
 })
 
-export const enablePageTranslationAtom = createTranslationStateAtomFromContentScript(
+export const enablePageTranslationAtom = createTranslationStateAtomForContentScript(
   { enabled: false },
 )
 
