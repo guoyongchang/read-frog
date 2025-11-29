@@ -2,4 +2,4 @@
 "@read-frog/extension": patch
 ---
 
-style: update custom prompt sheet
+style: update shadcn ghost color

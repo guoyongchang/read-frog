@@ -2,4 +2,4 @@
 "@read-frog/extension": patch
 ---
 
-style: llm status indicator color
+style: change more menu icons
