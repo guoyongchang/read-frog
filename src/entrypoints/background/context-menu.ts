@@ -14,12 +14,10 @@ const MENU_ID_TRANSLATE = 'read-frog-translate'
  * before Chrome completes initialization
  */
 export function registerContextMenuListeners() {
-  // Listen for config changes using native Chrome API for persistence
-  // This ensures the listener survives service worker sleep/wake cycles
-  browser.storage.local.onChanged.addListener(async (changes) => {
-    const configChange = changes[CONFIG_STORAGE_KEY]
-    if (configChange?.newValue) {
-      await updateContextMenuItems(configChange.newValue as Config)
+  // Listen for config changes to update context menu
+  storage.watch<Config>(`local:${CONFIG_STORAGE_KEY}`, async (newConfig) => {
+    if (newConfig) {
+      await updateContextMenuItems(newConfig)
     }
   })
 
