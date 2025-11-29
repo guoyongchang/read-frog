@@ -33,7 +33,7 @@ function getCachedArticleData(): typeof cachedArticleData {
 }
 
 async function getOrFetchArticleData(
-  includeTextContent: boolean,
+  enableAIContentAware: boolean,
 ): Promise<{ title: string, textContent?: string } | null> {
   // Only works in browser context
   if (typeof window === 'undefined' || typeof document === 'undefined') {
@@ -46,10 +46,10 @@ async function getOrFetchArticleData(
 
   // Cache should only be reused when the stored entry already includes text content
   // otherwise the feature never obtains article text after being enabled mid-session.
-  if (cached && (!includeTextContent || cached.textContent)) {
+  if (cached && (!enableAIContentAware || cached.textContent)) {
     return {
       title: cached.title,
-      textContent: includeTextContent ? cached.textContent : undefined,
+      textContent: enableAIContentAware ? cached.textContent : undefined,
     }
   }
 
@@ -58,7 +58,7 @@ async function getOrFetchArticleData(
 
   // Only extract textContent if needed
   let textContent = ''
-  if (includeTextContent) {
+  if (enableAIContentAware) {
     // Try Readability first for cleaner content
     try {
       const documentClone = document.cloneNode(true) as Document
@@ -87,7 +87,7 @@ async function getOrFetchArticleData(
 
   return {
     title,
-    textContent: includeTextContent ? textContent : undefined,
+    textContent: enableAIContentAware ? textContent : undefined,
   }
 }
 
