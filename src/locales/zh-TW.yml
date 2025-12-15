@@ -166,6 +166,28 @@ options:
       title: 選擇工具列
     contextMenu:
       title: 右鍵選單
+    inputTranslation:
+      title: 輸入翻譯
+  inputTranslation:
+    toggle:
+      title: 啟用三連空格翻譯
+      description: 在任意輸入框中快速按3次空格鍵即可翻譯其內容
+    direction:
+      title: 翻譯方向
+      description: 選擇文字翻譯的方向
+      normal: 母語 → 外語
+      reverse: 外語 → 母語
+      cycle: 循環切換
+    threshold:
+      title: 觸發閾值
+      description: 連續空格按鍵之間的時間間隔
+      label: 閾值 (毫秒)
+      hint: 連續空格按鍵之間的時間間隔 (100-1000毫秒)
+      error: 數值必須在 $1 到 $2 之間
+    toast:
+      translating: 正在翻譯 $1...
+      success: 翻譯完成 $1
+      failed: 翻譯失敗
   floatingButtonAndToolbar:
     title: 懸浮按鈕和工具列
     floatingButtonDemoImageAlt: 懸浮按鈕示範

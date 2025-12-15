@@ -167,6 +167,28 @@ options:
       title: Selection Toolbar
     contextMenu:
       title: Context Menu
+    inputTranslation:
+      title: Input Translation
+  inputTranslation:
+    toggle:
+      title: Enable Triple-Space Translation
+      description: Press spacebar 3 times quickly in any input field to translate its content
+    direction:
+      title: Translation Direction
+      description: Choose how text should be translated
+      normal: Native → Foreign
+      reverse: Foreign → Native
+      cycle: Cycle
+    threshold:
+      title: Trigger Threshold
+      description: Time interval between space presses to trigger translation
+      label: Threshold (ms)
+      hint: Time in milliseconds between consecutive space presses (100-1000ms)
+      error: Value must be between $1 and $2
+    toast:
+      translating: Translating $1...
+      success: Translation complete $1
+      failed: Translation failed
   floatingButtonAndToolbar:
     title: Floating Button & Toolbar
     floatingButtonDemoImageAlt: Floating Button Demo

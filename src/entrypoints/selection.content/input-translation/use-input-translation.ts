@@ -1,0 +1,170 @@
+import { i18n } from '#imports'
+import { useAtom } from 'jotai'
+import { useCallback, useEffect, useRef } from 'react'
+import { toast } from 'sonner'
+import { configFieldsAtomMap } from '@/utils/atoms/config'
+import { translateTextWithDirection } from '@/utils/host/translate/translate-text'
+
+const SPACE_KEY = ' '
+const TRIGGER_COUNT = 3
+
+/**
+ * Set text content with undo support using execCommand.
+ * This allows Ctrl+Z to restore the original text.
+ */
+function setTextWithUndo(element: HTMLInputElement | HTMLTextAreaElement | HTMLElement, text: string) {
+  element.focus()
+
+  if (element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement) {
+    // Select all text in input/textarea
+    element.select()
+  }
+  else if (element.isContentEditable) {
+    // Select all content in contenteditable
+    const selection = window.getSelection()
+    const range = document.createRange()
+    range.selectNodeContents(element)
+    selection?.removeAllRanges()
+    selection?.addRange(range)
+  }
+
+  // Use execCommand to insert text with undo support
+  // Note: execCommand is deprecated but still the only way to support undo
+  document.execCommand('insertText', false, text)
+
+  // Dispatch input event for framework compatibility (React, Vue, etc.)
+  element.dispatchEvent(new Event('input', { bubbles: true }))
+}
+
+export function useInputTranslation() {
+  const [inputTranslationConfig, setInputTranslationConfig] = useAtom(configFieldsAtomMap.inputTranslation)
+  const spaceTimestampsRef = useRef<number[]>([])
+  const isTranslatingRef = useRef(false)
+
+  const handleTranslation = useCallback(async (element: HTMLInputElement | HTMLTextAreaElement | HTMLElement) => {
+    if (isTranslatingRef.current)
+      return
+
+    // Get the text content based on element type
+    let text: string
+    if (element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement) {
+      text = element.value
+    }
+    else if (element.isContentEditable) {
+      text = element.textContent || ''
+    }
+    else {
+      return
+    }
+
+    // Remove trailing spaces (only TRIGGER_COUNT - 1 because the last space
+    // was prevented by preventDefault and never inserted)
+    text = text.slice(0, -(TRIGGER_COUNT - 1))
+
+    // Set the trimmed text back immediately (with undo support)
+    setTextWithUndo(element, text)
+
+    if (!text.trim()) {
+      return
+    }
+
+    // Determine actual translation direction
+    let actualDirection: 'normal' | 'reverse' = 'normal'
+    if (inputTranslationConfig.direction === 'cycle') {
+      // Toggle from last direction
+      actualDirection = inputTranslationConfig.lastCycleDirection === 'normal' ? 'reverse' : 'normal'
+      // Update the last cycle direction for next time
+      void setInputTranslationConfig({
+        ...inputTranslationConfig,
+        lastCycleDirection: actualDirection,
+      })
+    }
+    else {
+      actualDirection = inputTranslationConfig.direction
+    }
+
+    isTranslatingRef.current = true
+    const directionLabel = actualDirection === 'normal'
+      ? i18n.t('options.inputTranslation.direction.normal')
+      : i18n.t('options.inputTranslation.direction.reverse')
+    const toastId = toast.loading(i18n.t('options.inputTranslation.toast.translating', [directionLabel]))
+
+    try {
+      const translatedText = await translateTextWithDirection(text, actualDirection)
+
+      if (translatedText) {
+        // Set the translated text (with undo support)
+        setTextWithUndo(element, translatedText)
+        toast.success(i18n.t('options.inputTranslation.toast.success', [directionLabel]), { id: toastId })
+      }
+      else {
+        toast.dismiss(toastId)
+      }
+    }
+    catch (error) {
+      console.error('Input translation error:', error)
+      toast.error(i18n.t('options.inputTranslation.toast.failed'), { id: toastId })
+    }
+    finally {
+      isTranslatingRef.current = false
+    }
+  }, [inputTranslationConfig, setInputTranslationConfig])
+
+  useEffect(() => {
+    if (!inputTranslationConfig.enabled)
+      return
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // Only process space key
+      if (event.key !== SPACE_KEY) {
+        // Reset on any other key
+        spaceTimestampsRef.current = []
+        return
+      }
+
+      // Check if the active element is an input field
+      const activeElement = document.activeElement
+      const isInputField = activeElement instanceof HTMLInputElement
+        || activeElement instanceof HTMLTextAreaElement
+        || (activeElement instanceof HTMLElement && activeElement.isContentEditable)
+
+      if (!isInputField || !activeElement) {
+        spaceTimestampsRef.current = []
+        return
+      }
+
+      const now = Date.now()
+      const timestamps = spaceTimestampsRef.current
+
+      // Remove timestamps older than threshold
+      const timeThreshold = inputTranslationConfig.timeThreshold
+      while (timestamps.length > 0 && now - timestamps[0] > timeThreshold * (TRIGGER_COUNT - 1)) {
+        timestamps.shift()
+      }
+
+      // Add current timestamp
+      timestamps.push(now)
+
+      // Check if we have enough rapid presses
+      if (timestamps.length >= TRIGGER_COUNT) {
+        // Check if all presses are within the time threshold
+        const allWithinThreshold = timestamps.every((ts, i) => {
+          if (i === 0)
+            return true
+          return ts - timestamps[i - 1] <= timeThreshold
+        })
+
+        if (allWithinThreshold) {
+          event.preventDefault()
+          spaceTimestampsRef.current = []
+          void handleTranslation(activeElement as HTMLInputElement | HTMLTextAreaElement | HTMLElement)
+        }
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown, true)
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown, true)
+    }
+  }, [inputTranslationConfig.enabled, inputTranslationConfig.timeThreshold, handleTranslation])
+}

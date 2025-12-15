@@ -166,6 +166,28 @@ options:
       title: 选择工具栏
     contextMenu:
       title: 右键菜单
+    inputTranslation:
+      title: 输入翻译
+  inputTranslation:
+    toggle:
+      title: 启用三连空格翻译
+      description: 在任意输入框中快速按3次空格键即可翻译其内容
+    direction:
+      title: 翻译方向
+      description: 选择文本翻译的方向
+      normal: 母语 → 外语
+      reverse: 外语 → 母语
+      cycle: 循环切换
+    threshold:
+      title: 触发阈值
+      description: 连续空格按键之间的时间间隔
+      label: 阈值 (毫秒)
+      hint: 连续空格按键之间的时间间隔 (100-1000毫秒)
+      error: 数值必须在 $1 到 $2 之间
+    toast:
+      translating: 正在翻译 $1...
+      success: 翻译完成 $1
+      failed: 翻译失败
   floatingButtonAndToolbar:
     title: 悬浮按钮和工具栏
     floatingButtonDemoImageAlt: 悬浮按钮演示

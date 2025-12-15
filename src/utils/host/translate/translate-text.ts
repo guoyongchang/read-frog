@@ -182,6 +182,95 @@ export async function translateText(text: string) {
   })
 }
 
+/**
+ * Translate text with configurable direction
+ * @param text - The text to translate
+ * @param direction - 'normal' (target→source), 'reverse' (source→target), or actual direction for cycle mode
+ */
+export async function translateTextWithDirection(
+  text: string,
+  direction: 'normal' | 'reverse' = 'normal',
+): Promise<string> {
+  const config = await getLocalConfig()
+  if (!config) {
+    throw new Error('No global config when translate text')
+  }
+  const providerId = config.translate.providerId
+  const providerConfig = getProviderConfigById(config.providersConfig, providerId)
+
+  if (!providerConfig) {
+    throw new Error(`No provider config for id ${providerId} when translate text`)
+  }
+
+  // Determine translation direction
+  // normal: target → source (type in native language, translate for foreigners to read)
+  // reverse: source → target (type in foreign language, translate for yourself to read)
+  let langConfig = config.language
+
+  if (direction === 'normal') {
+    // Translate FROM target language TO source language
+    // e.g., User types Chinese (target) → get English (source)
+    let effectiveSourceCode = config.language.sourceCode
+    if (config.language.sourceCode === 'auto') {
+      // When source is 'auto', we need to detect what language to translate TO
+      // For "normal" mode, user wants to translate to the foreign language
+      // We'll use 'auto' to let the translation API figure it out
+      effectiveSourceCode = 'auto'
+    }
+    langConfig = {
+      ...config.language,
+      sourceCode: config.language.targetCode, // User's input is in target language
+      targetCode: effectiveSourceCode === 'auto' ? 'eng' : effectiveSourceCode, // Translate to source (foreign) language
+    }
+  }
+  // For 'reverse' mode, we keep the original langConfig (source → target)
+  // This is the same as page translation direction
+
+  // Skip translation if text is already in target language
+  if (text.length >= MIN_LENGTH_FOR_LANG_DETECTION) {
+    const detectedLang = franc(text)
+    if (detectedLang === langConfig.targetCode) {
+      logger.info(`translateTextWithDirection: skipping translation because text is already in target language. text: ${text}`)
+      return ''
+    }
+  }
+
+  // Get article data for LLM providers first (needed for both hash and request)
+  let articleTitle: string | undefined
+  let articleTextContent: string | undefined
+
+  if (isLLMTranslateProviderConfig(providerConfig)) {
+    const articleData = await getOrFetchArticleData(config.translate.enableAIContentAware)
+    if (articleData) {
+      articleTitle = articleData.title
+      articleTextContent = articleData.textContent
+    }
+  }
+
+  const hashComponents = await buildHashComponents(
+    text,
+    providerConfig,
+    { sourceCode: langConfig.sourceCode, targetCode: langConfig.targetCode },
+    config.translate.enableAIContentAware,
+    { title: articleTitle, textContent: articleTextContent },
+  )
+
+  // Add direction indicator to hash to differentiate cache entries
+  if (direction === 'normal') {
+    hashComponents.push('direction=normal')
+  }
+
+  return await sendMessage('enqueueTranslateRequest', {
+    text,
+    langConfig,
+    providerConfig,
+    scheduleAt: Date.now(),
+    hash: Sha256Hex(...hashComponents),
+    articleTitle,
+    articleTextContent,
+  })
+}
+
 export function validateTranslationConfigAndToast(
   config: Pick<Config, 'providersConfig' | 'translate' | 'language'>,
   detectedCode: LangCodeISO6393,

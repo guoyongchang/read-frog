@@ -42,6 +42,19 @@ const contextMenuSchema = z.object({
   enabled: z.boolean(),
 })
 
+// input translation schema (triple-space trigger)
+const inputTranslationSchema = z.object({
+  enabled: z.boolean(),
+  // normal: target → source (type native, get foreign for others to read)
+  // reverse: source → target (type foreign, get native for yourself)
+  // cycle: alternate between the two each time
+  direction: z.enum(['normal', 'reverse', 'cycle']),
+  // Internal state for cycle mode - tracks last direction used
+  lastCycleDirection: z.enum(['normal', 'reverse']).optional(),
+  // Time threshold in milliseconds between space presses (default 300ms)
+  timeThreshold: z.number().min(100).max(1000),
+})
+
 // Complete config schema
 export const configSchema = z.object({
   language: languageSchema,
@@ -54,6 +67,7 @@ export const configSchema = z.object({
   sideContent: sideContentSchema,
   betaExperience: betaExperienceSchema,
   contextMenu: contextMenuSchema,
+  inputTranslation: inputTranslationSchema,
 }).superRefine((data, ctx) => {
   const providerIdsSet = new Set(data.providersConfig.map(p => p.id))
   const providerIds = Array.from(providerIdsSet)
