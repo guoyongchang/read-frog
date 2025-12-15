@@ -1,4 +1,4 @@
-import type { LangCodeISO6393 } from '@read-frog/definitions'
+import type { LangCodeISO6393, LangLevel } from '@read-frog/definitions'
 import type { Config } from '@/types/config/config'
 import type { ProviderConfig } from '@/types/config/provider'
 import { i18n } from '#imports'
@@ -128,11 +128,23 @@ async function buildHashComponents(
   return hashComponents
 }
 
-export async function translateText(text: string) {
+interface TranslateTextOptions {
+  text: string
+  langConfig: { sourceCode: LangCodeISO6393 | 'auto', targetCode: LangCodeISO6393, level: LangLevel }
+  extraHashTags?: string[]
+}
+
+/**
+ * Core translation function that handles common logic
+ */
+async function translateTextCore(options: TranslateTextOptions): Promise<string> {
+  const { text, langConfig, extraHashTags = [] } = options
+
   const config = await getLocalConfig()
   if (!config) {
     throw new Error('No global config when translate text')
   }
+
   const providerId = config.translate.providerId
   const providerConfig = getProviderConfigById(config.providersConfig, providerId)
 
@@ -140,18 +152,16 @@ export async function translateText(text: string) {
     throw new Error(`No provider config for id ${providerId} when translate text`)
   }
 
-  const langConfig = config.language
-
   // Skip translation if text is already in target language
   if (text.length >= MIN_LENGTH_FOR_LANG_DETECTION) {
     const detectedLang = franc(text)
     if (detectedLang === langConfig.targetCode) {
-      logger.info(`translateText: skipping translation because text is already in target language. text: ${text}`)
+      logger.info(`translateTextCore: skipping translation because text is already in target language. text: ${text}`)
       return ''
     }
   }
 
-  // Get article data for LLM providers first (needed for both hash and request)
+  // Get article data for LLM providers (needed for both hash and request)
   let articleTitle: string | undefined
   let articleTextContent: string | undefined
 
@@ -170,6 +180,9 @@ export async function translateText(text: string) {
     config.translate.enableAIContentAware,
     { title: articleTitle, textContent: articleTextContent },
   )
+
+  // Add extra hash tags for cache differentiation
+  hashComponents.push(...extraHashTags)
 
   return await sendMessage('enqueueTranslateRequest', {
     text,
@@ -182,10 +195,22 @@ export async function translateText(text: string) {
   })
 }
 
+export async function translateText(text: string): Promise<string> {
+  const config = await getLocalConfig()
+  if (!config) {
+    throw new Error('No global config when translate text')
+  }
+
+  return translateTextCore({
+    text,
+    langConfig: config.language,
+  })
+}
+
 /**
  * Translate text with configurable direction
  * @param text - The text to translate
- * @param direction - 'normal' (target→source), 'reverse' (source→target), or actual direction for cycle mode
+ * @param direction - 'normal' (target→source), 'reverse' (source→target)
  */
 export async function translateTextWithDirection(
   text: string,
@@ -194,12 +219,6 @@ export async function translateTextWithDirection(
   const config = await getLocalConfig()
   if (!config) {
     throw new Error('No global config when translate text')
-  }
-  const providerId = config.translate.providerId
-  const providerConfig = getProviderConfigById(config.providersConfig, providerId)
-
-  if (!providerConfig) {
-    throw new Error(`No provider config for id ${providerId} when translate text`)
   }
 
   // Determine translation direction
@@ -210,64 +229,19 @@ export async function translateTextWithDirection(
   if (direction === 'normal') {
     // Translate FROM target language TO source language
     // e.g., User types Chinese (target) → get English (source)
-    let effectiveSourceCode = config.language.sourceCode
-    if (config.language.sourceCode === 'auto') {
-      // When source is 'auto', we need to detect what language to translate TO
-      // For "normal" mode, user wants to translate to the foreign language
-      // We'll use 'auto' to let the translation API figure it out
-      effectiveSourceCode = 'auto'
-    }
+    const effectiveSourceCode = config.language.sourceCode
     langConfig = {
       ...config.language,
-      sourceCode: config.language.targetCode, // User's input is in target language
-      targetCode: effectiveSourceCode === 'auto' ? 'eng' : effectiveSourceCode, // Translate to source (foreign) language
+      sourceCode: config.language.targetCode,
+      targetCode: effectiveSourceCode === 'auto' ? 'eng' : effectiveSourceCode,
     }
   }
-  // For 'reverse' mode, we keep the original langConfig (source → target)
-  // This is the same as page translation direction
+  // For 'reverse' mode, keep original langConfig (source → target)
 
-  // Skip translation if text is already in target language
-  if (text.length >= MIN_LENGTH_FOR_LANG_DETECTION) {
-    const detectedLang = franc(text)
-    if (detectedLang === langConfig.targetCode) {
-      logger.info(`translateTextWithDirection: skipping translation because text is already in target language. text: ${text}`)
-      return ''
-    }
-  }
-
-  // Get article data for LLM providers first (needed for both hash and request)
-  let articleTitle: string | undefined
-  let articleTextContent: string | undefined
-
-  if (isLLMTranslateProviderConfig(providerConfig)) {
-    const articleData = await getOrFetchArticleData(config.translate.enableAIContentAware)
-    if (articleData) {
-      articleTitle = articleData.title
-      articleTextContent = articleData.textContent
-    }
-  }
-
-  const hashComponents = await buildHashComponents(
-    text,
-    providerConfig,
-    { sourceCode: langConfig.sourceCode, targetCode: langConfig.targetCode },
-    config.translate.enableAIContentAware,
-    { title: articleTitle, textContent: articleTextContent },
-  )
-
-  // Add direction indicator to hash to differentiate cache entries
-  if (direction === 'normal') {
-    hashComponents.push('direction=normal')
-  }
-
-  return await sendMessage('enqueueTranslateRequest', {
+  return translateTextCore({
     text,
     langConfig,
-    providerConfig,
-    scheduleAt: Date.now(),
-    hash: Sha256Hex(...hashComponents),
-    articleTitle,
-    articleTextContent,
+    extraHashTags: direction === 'normal' ? ['direction=normal'] : [],
   })
 }
 

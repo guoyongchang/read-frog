@@ -7,6 +7,35 @@ import { translateTextWithDirection } from '@/utils/host/translate/translate-tex
 
 const SPACE_KEY = ' '
 const TRIGGER_COUNT = 3
+const LAST_CYCLE_DIRECTION_KEY = 'read-frog-input-translation-last-cycle-direction'
+
+/**
+ * Get last cycle direction from sessionStorage
+ */
+function getLastCycleDirection(): 'normal' | 'reverse' | undefined {
+  try {
+    const value = sessionStorage.getItem(LAST_CYCLE_DIRECTION_KEY)
+    if (value === 'normal' || value === 'reverse') {
+      return value
+    }
+  }
+  catch {
+    // sessionStorage may not be available in some contexts
+  }
+  return undefined
+}
+
+/**
+ * Set last cycle direction in sessionStorage
+ */
+function setLastCycleDirection(direction: 'normal' | 'reverse'): void {
+  try {
+    sessionStorage.setItem(LAST_CYCLE_DIRECTION_KEY, direction)
+  }
+  catch {
+    // sessionStorage may not be available in some contexts
+  }
+}
 
 /**
  * Set text content with undo support using execCommand.
@@ -37,7 +66,7 @@ function setTextWithUndo(element: HTMLInputElement | HTMLTextAreaElement | HTMLE
 }
 
 export function useInputTranslation() {
-  const [inputTranslationConfig, setInputTranslationConfig] = useAtom(configFieldsAtomMap.inputTranslation)
+  const [inputTranslationConfig] = useAtom(configFieldsAtomMap.inputTranslation)
   const spaceTimestampsRef = useRef<number[]>([])
   const isTranslatingRef = useRef(false)
 
@@ -71,13 +100,10 @@ export function useInputTranslation() {
     // Determine actual translation direction
     let actualDirection: 'normal' | 'reverse' = 'normal'
     if (inputTranslationConfig.direction === 'cycle') {
-      // Toggle from last direction
-      actualDirection = inputTranslationConfig.lastCycleDirection === 'normal' ? 'reverse' : 'normal'
-      // Update the last cycle direction for next time
-      void setInputTranslationConfig({
-        ...inputTranslationConfig,
-        lastCycleDirection: actualDirection,
-      })
+      // Toggle from last direction (stored in sessionStorage, not config)
+      const lastDirection = getLastCycleDirection()
+      actualDirection = lastDirection === 'normal' ? 'reverse' : 'normal'
+      setLastCycleDirection(actualDirection)
     }
     else {
       actualDirection = inputTranslationConfig.direction
@@ -108,7 +134,7 @@ export function useInputTranslation() {
     finally {
       isTranslatingRef.current = false
     }
-  }, [inputTranslationConfig, setInputTranslationConfig])
+  }, [inputTranslationConfig.direction])
 
   useEffect(() => {
     if (!inputTranslationConfig.enabled)

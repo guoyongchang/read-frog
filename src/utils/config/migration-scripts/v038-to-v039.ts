@@ -15,7 +15,6 @@ export function migrate(oldConfig: any): any {
     inputTranslation: {
       enabled: true,
       direction: 'normal',
-      lastCycleDirection: undefined,
       timeThreshold: 300,
     },
   }

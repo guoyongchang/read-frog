@@ -166,7 +166,6 @@ export const testSeries: TestSeriesObject = {
       inputTranslation: {
         enabled: true,
         direction: 'normal',
-        lastCycleDirection: undefined,
         timeThreshold: 300,
       },
     },
@@ -292,7 +291,6 @@ export const testSeries: TestSeriesObject = {
       inputTranslation: {
         enabled: true,
         direction: 'normal',
-        lastCycleDirection: undefined,
         timeThreshold: 300,
       },
     },

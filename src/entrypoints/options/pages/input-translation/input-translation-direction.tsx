@@ -21,8 +21,6 @@ export function InputTranslationDirection() {
           void setInputTranslation({
             ...inputTranslation,
             direction: value,
-            // Reset cycle state when changing modes
-            lastCycleDirection: undefined,
           })
         }}
         className="flex flex-col gap-2"

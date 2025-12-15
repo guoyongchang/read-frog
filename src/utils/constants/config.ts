@@ -89,7 +89,6 @@ export const DEFAULT_CONFIG: Config = {
   inputTranslation: {
     enabled: true,
     direction: 'normal',
-    lastCycleDirection: undefined,
     timeThreshold: 300,
   },
 }

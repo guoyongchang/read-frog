@@ -49,8 +49,6 @@ const inputTranslationSchema = z.object({
   // reverse: source → target (type foreign, get native for yourself)
   // cycle: alternate between the two each time
   direction: z.enum(['normal', 'reverse', 'cycle']),
-  // Internal state for cycle mode - tracks last direction used
-  lastCycleDirection: z.enum(['normal', 'reverse']).optional(),
   // Time threshold in milliseconds between space presses (default 300ms)
   timeThreshold: z.number().min(100).max(1000),
 })
