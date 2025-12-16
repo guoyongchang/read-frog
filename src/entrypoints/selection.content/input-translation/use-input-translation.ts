@@ -74,6 +74,11 @@ export function useInputTranslation() {
     if (isTranslatingRef.current)
       return
 
+    // Security: skip password fields to prevent exposing sensitive data
+    if (element instanceof HTMLInputElement && element.type === 'password') {
+      return
+    }
+
     // Get the text content based on element type
     let text: string
     if (element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement) {
