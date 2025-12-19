@@ -241,7 +241,7 @@ export async function translateTextWithDirection(
   return translateTextCore({
     text,
     langConfig,
-    extraHashTags: direction === 'normal' ? ['direction=normal'] : [],
+    extraHashTags: direction === 'normal' ? ['direction=normal'] : ['direction=reverse'],
   })
 }
 

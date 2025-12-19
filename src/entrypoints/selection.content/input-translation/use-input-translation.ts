@@ -120,13 +120,32 @@ export function useInputTranslation() {
       : i18n.t('options.inputTranslation.direction.reverse')
     const toastId = toast.loading(i18n.t('options.inputTranslation.toast.translating', [directionLabel]))
 
+    // Store original text to detect if user edited during translation
+    const originalText = text
+
     try {
       const translatedText = await translateTextWithDirection(text, actualDirection)
 
-      if (translatedText) {
-        // Set the translated text (with undo support)
+      // Check if element content changed during translation (user input)
+      let currentText: string
+      if (element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement) {
+        currentText = element.value
+      }
+      else if (element.isContentEditable) {
+        currentText = element.textContent || ''
+      }
+      else {
+        currentText = originalText
+      }
+
+      // Only apply translation if content hasn't changed during async operation
+      if (currentText === originalText && translatedText) {
         setTextWithUndo(element, translatedText)
         toast.success(i18n.t('options.inputTranslation.toast.success', [directionLabel]), { id: toastId })
+      }
+      else if (currentText !== originalText) {
+        // User edited during translation, dismiss the loading toast
+        toast.dismiss(toastId)
       }
       else {
         toast.dismiss(toastId)
