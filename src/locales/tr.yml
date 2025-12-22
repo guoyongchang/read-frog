@@ -185,9 +185,12 @@ options:
       label: Eşik (ms)
       hint: Ardışık boşluk tuşuna basışlar arasındaki milisaniye cinsinden süre (100-1000ms)
       error: Değer $1 ile $2 arasında olmalıdır
+    showToast:
+      title: Bildirimleri Göster
+      description: Çeviri devam ederken bildirim mesajları göster
     toast:
-      translating: Çevriliyor $1...
-      success: Çeviri tamamlandı $1
+      translating: Çevriliyor...
+      success: Çeviri tamamlandı
       failed: Çeviri başarısız
   floatingButtonAndToolbar:
     title: Yüzen Buton ve Araç Çubuğu

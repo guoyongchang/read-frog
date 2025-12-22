@@ -184,9 +184,12 @@ options:
       label: 閾值 (毫秒)
       hint: 連續空格按鍵之間的時間間隔 (100-1000毫秒)
       error: 數值必須在 $1 到 $2 之間
+    showToast:
+      title: 顯示通知
+      description: 翻譯進行中時顯示訊息提示
     toast:
-      translating: 正在翻譯 $1...
-      success: 翻譯完成 $1
+      translating: 正在翻譯...
+      success: 翻譯完成
       failed: 翻譯失敗
   floatingButtonAndToolbar:
     title: 懸浮按鈕和工具列

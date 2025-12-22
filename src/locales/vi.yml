@@ -185,9 +185,12 @@ options:
       label: Ngưỡng (ms)
       hint: Thời gian tính bằng mili giây giữa các lần nhấn phím cách liên tiếp (100-1000ms)
       error: Giá trị phải từ $1 đến $2
+    showToast:
+      title: Hiển thị thông báo
+      description: Hiển thị thông báo toast khi đang dịch
     toast:
-      translating: Đang dịch $1...
-      success: Dịch hoàn tất $1
+      translating: Đang dịch...
+      success: Dịch hoàn tất
       failed: Dịch thất bại
   floatingButtonAndToolbar:
     title: Nút nổi & Thanh công cụ

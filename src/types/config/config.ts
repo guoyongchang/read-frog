@@ -51,6 +51,8 @@ const inputTranslationSchema = z.object({
   direction: z.enum(['normal', 'reverse', 'cycle']),
   // Time threshold in milliseconds between space presses (default 300ms)
   timeThreshold: z.number().min(100).max(1000),
+  // Show toast notifications for translation status
+  showToast: z.boolean(),
 })
 
 // Complete config schema

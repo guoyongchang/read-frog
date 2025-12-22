@@ -183,9 +183,12 @@ options:
       label: しきい値 (ミリ秒)
       hint: 連続したスペースキー押下間の時間間隔 (100-1000ミリ秒)
       error: 値は $1 から $2 の間である必要があります
+    showToast:
+      title: 通知を表示
+      description: 翻訳実行中にトースト通知を表示する
     toast:
-      translating: 翻訳中 $1...
-      success: 翻訳完了 $1
+      translating: 翻訳中...
+      success: 翻訳完了
       failed: 翻訳に失敗しました
   floatingButtonAndToolbar:
     title: フローティングボタンとツールバー

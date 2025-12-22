@@ -115,10 +115,7 @@ export function useInputTranslation() {
     }
 
     isTranslatingRef.current = true
-    const directionLabel = actualDirection === 'normal'
-      ? i18n.t('options.inputTranslation.direction.normal')
-      : i18n.t('options.inputTranslation.direction.reverse')
-    const toastId = toast.loading(i18n.t('options.inputTranslation.toast.translating', [directionLabel]))
+    const toastId = inputTranslationConfig.showToast ? toast.loading(i18n.t('options.inputTranslation.toast.translating')) : undefined
 
     // Store original text to detect if user edited during translation
     const originalText = text
@@ -141,24 +138,30 @@ export function useInputTranslation() {
       // Only apply translation if content hasn't changed during async operation
       if (currentText === originalText && translatedText) {
         setTextWithUndo(element, translatedText)
-        toast.success(i18n.t('options.inputTranslation.toast.success', [directionLabel]), { id: toastId })
+        if (inputTranslationConfig.showToast) {
+          toast.success(i18n.t('options.inputTranslation.toast.success'), { id: toastId })
+        }
       }
       else if (currentText !== originalText) {
         // User edited during translation, dismiss the loading toast
-        toast.dismiss(toastId)
+        if (inputTranslationConfig.showToast && toastId) {
+          toast.dismiss(toastId)
+        }
       }
-      else {
+      else if (inputTranslationConfig.showToast && toastId) {
         toast.dismiss(toastId)
       }
     }
     catch (error) {
       console.error('Input translation error:', error)
-      toast.error(i18n.t('options.inputTranslation.toast.failed'), { id: toastId })
+      if (inputTranslationConfig.showToast) {
+        toast.error(i18n.t('options.inputTranslation.toast.failed'), { id: toastId })
+      }
     }
     finally {
       isTranslatingRef.current = false
     }
-  }, [inputTranslationConfig.direction])
+  }, [inputTranslationConfig.direction, inputTranslationConfig.showToast])
 
   useEffect(() => {
     if (!inputTranslationConfig.enabled)

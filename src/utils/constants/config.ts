@@ -90,6 +90,7 @@ export const DEFAULT_CONFIG: Config = {
     enabled: true,
     direction: 'normal',
     timeThreshold: 300,
+    showToast: true,
   },
 }
 
