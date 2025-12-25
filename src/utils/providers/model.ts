@@ -1,3 +1,4 @@
+import type { LanguageModel } from 'ai'
 import type { Config } from '@/types/config/config'
 import { storage } from '#imports'
 import { createAmazonBedrock } from '@ai-sdk/amazon-bedrock'
@@ -19,60 +20,63 @@ import { createVercel } from '@ai-sdk/vercel'
 import { createXai } from '@ai-sdk/xai'
 import { createOpenRouter } from '@openrouter/ai-sdk-provider'
 import { createOllama } from 'ollama-ai-provider-v2'
+import { createMinimax } from 'vercel-minimax-ai-provider'
 import { isCustomLLMProvider } from '@/types/config/provider'
 import { getLLMTranslateProvidersConfig, getProviderConfigById, getTTSProvidersConfig } from '../config/helpers'
 import { CONFIG_STORAGE_KEY } from '../constants/config'
 
 interface ProviderFactoryMap {
-  siliconflow: typeof createOpenAICompatible
-  tensdaq: typeof createOpenAICompatible
-  ai302: typeof createOpenAICompatible
-  volcengine: typeof createOpenAICompatible
-  openrouter: typeof createOpenRouter
-  openaiCompatible: typeof createOpenAICompatible
-  openai: typeof createOpenAI
-  deepseek: typeof createDeepSeek
-  gemini: typeof createGoogleGenerativeAI
-  anthropic: typeof createAnthropic
-  grok: typeof createXai
-  amazonBedrock: typeof createAmazonBedrock
-  groq: typeof createGroq
-  deepinfra: typeof createDeepInfra
-  mistral: typeof createMistral
-  togetherai: typeof createTogetherAI
-  cohere: typeof createCohere
-  fireworks: typeof createFireworks
-  cerebras: typeof createCerebras
-  replicate: typeof createReplicate
-  perplexity: typeof createPerplexity
-  vercel: typeof createVercel
-  ollama: typeof createOllama
+  'siliconflow': typeof createOpenAICompatible
+  'tensdaq': typeof createOpenAICompatible
+  'ai302': typeof createOpenAICompatible
+  'volcengine': typeof createOpenAICompatible
+  'openrouter': typeof createOpenRouter
+  'openai-compatible': typeof createOpenAICompatible
+  'openai': typeof createOpenAI
+  'deepseek': typeof createDeepSeek
+  'google': typeof createGoogleGenerativeAI
+  'anthropic': typeof createAnthropic
+  'xai': typeof createXai
+  'bedrock': typeof createAmazonBedrock
+  'groq': typeof createGroq
+  'deepinfra': typeof createDeepInfra
+  'mistral': typeof createMistral
+  'togetherai': typeof createTogetherAI
+  'cohere': typeof createCohere
+  'fireworks': typeof createFireworks
+  'cerebras': typeof createCerebras
+  'replicate': typeof createReplicate
+  'perplexity': typeof createPerplexity
+  'vercel': typeof createVercel
+  'ollama': typeof createOllama
+  'minimax': typeof createMinimax
 }
 
 const CREATE_AI_MAPPER: ProviderFactoryMap = {
-  siliconflow: createOpenAICompatible,
-  tensdaq: createOpenAICompatible,
-  ai302: createOpenAICompatible,
-  volcengine: createOpenAICompatible,
-  openrouter: createOpenRouter,
-  openaiCompatible: createOpenAICompatible,
-  openai: createOpenAI,
-  deepseek: createDeepSeek,
-  gemini: createGoogleGenerativeAI,
-  anthropic: createAnthropic,
-  grok: createXai,
-  amazonBedrock: createAmazonBedrock,
-  groq: createGroq,
-  deepinfra: createDeepInfra,
-  mistral: createMistral,
-  togetherai: createTogetherAI,
-  cohere: createCohere,
-  fireworks: createFireworks,
-  cerebras: createCerebras,
-  replicate: createReplicate,
-  perplexity: createPerplexity,
-  vercel: createVercel,
-  ollama: createOllama,
+  'siliconflow': createOpenAICompatible,
+  'tensdaq': createOpenAICompatible,
+  'ai302': createOpenAICompatible,
+  'volcengine': createOpenAICompatible,
+  'openrouter': createOpenRouter,
+  'openai-compatible': createOpenAICompatible,
+  'openai': createOpenAI,
+  'deepseek': createDeepSeek,
+  'google': createGoogleGenerativeAI,
+  'anthropic': createAnthropic,
+  'xai': createXai,
+  'bedrock': createAmazonBedrock,
+  'groq': createGroq,
+  'deepinfra': createDeepInfra,
+  'mistral': createMistral,
+  'togetherai': createTogetherAI,
+  'cohere': createCohere,
+  'fireworks': createFireworks,
+  'cerebras': createCerebras,
+  'replicate': createReplicate,
+  'perplexity': createPerplexity,
+  'vercel': createVercel,
+  'ollama': createOllama,
+  'minimax': createMinimax,
 }
 
 const CUSTOM_HEADER_MAP: Partial<Record<keyof ProviderFactoryMap, Record<string, string>>> = {
@@ -95,7 +99,7 @@ async function getLanguageModelById(providerId: string, modelType: 'read' | 'tra
 
   const provider = isCustomLLMProvider(providerConfig.provider)
     ? CREATE_AI_MAPPER[providerConfig.provider]({
-        name: providerConfig.name,
+        name: providerConfig.provider,
         baseURL: providerConfig.baseURL ?? '',
         ...(providerConfig.apiKey && { apiKey: providerConfig.apiKey }),
         ...(customHeaders && { headers: customHeaders }),
@@ -115,7 +119,8 @@ async function getLanguageModelById(providerId: string, modelType: 'read' | 'tra
     throw new Error(`Model is undefined for ${modelType}`)
   }
 
-  return provider.languageModel(modelId)
+  // TODO: remove `as LanguageModel` after openrouter provider is compatible with AI SDK v6
+  return provider.languageModel(modelId) as LanguageModel
 }
 
 export async function getTranslateModelById(providerId: string) {

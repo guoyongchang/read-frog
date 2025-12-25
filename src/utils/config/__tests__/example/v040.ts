@@ -2,7 +2,7 @@ import type { TestSeriesObject } from './types'
 
 export const testSeries: TestSeriesObject = {
   'complex-config-from-v020': {
-    description: 'Migrate provider keys to match AI SDK expectations',
+    description: 'Add inputTranslation config',
     config: {
       language: {
         sourceCode: 'spa',
@@ -163,10 +163,16 @@ export const testSeries: TestSeriesObject = {
       contextMenu: {
         enabled: true,
       },
+      inputTranslation: {
+        enabled: true,
+        direction: 'normal',
+        timeThreshold: 300,
+        showToast: true,
+      },
     },
   },
   'config-with-no-default-openai-model': {
-    description: 'Migrate provider keys to match AI SDK expectations',
+    description: 'Add inputTranslation config',
     config: {
       floatingButton: {
         disabledFloatingButtonPatterns: [],
@@ -283,10 +289,16 @@ export const testSeries: TestSeriesObject = {
       contextMenu: {
         enabled: true,
       },
+      inputTranslation: {
+        enabled: true,
+        direction: 'normal',
+        timeThreshold: 300,
+        showToast: true,
+      },
     },
   },
   'comprehensive-provider-migration-test': {
-    description: 'Test all provider key migrations: gemini→google, grok→xai, amazonBedrock→bedrock, google→google-translate, microsoft→microsoft-translate, openaiCompatible→openai-compatible',
+    description: 'Add inputTranslation config',
     config: {
       language: {
         sourceCode: 'auto',
@@ -466,6 +478,12 @@ export const testSeries: TestSeriesObject = {
       },
       contextMenu: {
         enabled: true,
+      },
+      inputTranslation: {
+        enabled: true,
+        direction: 'normal',
+        timeThreshold: 300,
+        showToast: true,
       },
     },
   },
