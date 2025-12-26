@@ -163,6 +163,9 @@ export const testSeries: TestSeriesObject = {
       contextMenu: {
         enabled: true,
       },
+      videoSubtitles: {
+        enabled: false,
+      },
       inputTranslation: {
         enabled: true,
         direction: 'normal',
@@ -288,6 +291,9 @@ export const testSeries: TestSeriesObject = {
       },
       contextMenu: {
         enabled: true,
+      },
+      videoSubtitles: {
+        enabled: false,
       },
       inputTranslation: {
         enabled: true,
@@ -478,6 +484,9 @@ export const testSeries: TestSeriesObject = {
       },
       contextMenu: {
         enabled: true,
+      },
+      videoSubtitles: {
+        enabled: false,
       },
       inputTranslation: {
         enabled: true,
