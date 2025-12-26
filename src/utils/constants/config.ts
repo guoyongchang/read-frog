@@ -92,6 +92,9 @@ export const DEFAULT_CONFIG: Config = {
     timeThreshold: 300,
     showToast: true,
   },
+  videoSubtitles: {
+    enabled: false,
+  },
 }
 
 export const PAGE_TRANSLATE_RANGE_ITEMS: Record<
